@@ -9,7 +9,8 @@ import lombok.Data;
  */
 @Data
 @TableName("t_payment_info")
-public class PaymentInfo extends BaseEntity {
+public class PaymentInfo extends BaseEntity
+{
     /**
      * 商品订单编号
      */

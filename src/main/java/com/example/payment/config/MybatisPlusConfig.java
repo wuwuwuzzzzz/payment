@@ -11,5 +11,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @MapperScan("com.example.payment.mapper")
 @EnableTransactionManagement
-public class MybatisPlusConfig {
+public class MybatisPlusConfig
+{
 }

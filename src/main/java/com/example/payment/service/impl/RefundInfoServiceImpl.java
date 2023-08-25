@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
  * @date 12:07 2023/8/24
  */
 @Service
-public class RefundInfoServiceImpl extends ServiceImpl<RefundInfoMapper, RefundInfo> implements RefundInfoService {
+public class RefundInfoServiceImpl extends ServiceImpl<RefundInfoMapper, RefundInfo> implements RefundInfoService
+{
 
 }

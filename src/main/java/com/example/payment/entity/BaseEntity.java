@@ -11,8 +11,8 @@ import java.util.Date;
  * @date 11:57 2023/8/24
  */
 @Data
-public class BaseEntity {
-
+public class BaseEntity
+{
     /**
      * 主键
      */

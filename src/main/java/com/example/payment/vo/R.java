@@ -1,6 +1,7 @@
 package com.example.payment.vo;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +11,9 @@ import java.util.Map;
  * @date 11:22 2023/8/24
  */
 @Data
-public class R {
-
+@Accessors(chain = true)
+public class R
+{
     /**
      * 响应码
      */
@@ -34,7 +36,8 @@ public class R {
      * @author wxz
      * @date 11:27 2023/8/24
      */
-    public static R ok() {
+    public static R ok()
+    {
         R r = new R();
         r.setCode(0);
         r.setMsg("success");
@@ -48,7 +51,8 @@ public class R {
      * @author wxz
      * @date 11:28 2023/8/24
      */
-    public static R error() {
+    public static R error()
+    {
         R r = new R();
         r.setCode(1);
         r.setMsg("error");
@@ -62,7 +66,8 @@ public class R {
      * @author wxz
      * @date 11:30 2023/8/24
      */
-    public R data(String key, Object value) {
+    public R data(String key, Object value)
+    {
         this.data.put(key, value);
         return this;
     }

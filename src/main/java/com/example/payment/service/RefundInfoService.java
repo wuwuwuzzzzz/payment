@@ -7,6 +7,7 @@ import com.example.payment.entity.RefundInfo;
  * @author wxz
  * @date 12:05 2023/8/24
  */
-public interface RefundInfoService extends IService<RefundInfo> {
+public interface RefundInfoService extends IService<RefundInfo>
+{
 
 }

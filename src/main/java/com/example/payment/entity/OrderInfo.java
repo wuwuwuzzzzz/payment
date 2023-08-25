@@ -9,8 +9,8 @@ import lombok.Data;
  */
 @Data
 @TableName("t_order_info")
-public class OrderInfo extends BaseEntity {
-
+public class OrderInfo extends BaseEntity
+{
     /**
      * 商品名称
      */

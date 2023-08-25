@@ -9,8 +9,8 @@ import lombok.Data;
  */
 @Data
 @TableName("t_refund_info")
-public class RefundInfo extends BaseEntity {
-
+public class RefundInfo extends BaseEntity
+{
     /**
      * 商品订单编号
      */

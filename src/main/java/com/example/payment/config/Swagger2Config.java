@@ -13,15 +13,17 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
-public class Swagger2Config {
-
+public class Swagger2Config
+{
     /**
      * @return springfox.documentation.spring.web.plugins.Docket
      * @author wxz
      * @date 16:18 2023/8/23
      */
     @Bean
-    public Docket docket() {
-        return new Docket(DocumentationType.SWAGGER_2).apiInfo(new ApiInfoBuilder().title("微信支付案例接口文档").build());
+    public Docket docket()
+    {
+        return new Docket(DocumentationType.SWAGGER_2).apiInfo(new ApiInfoBuilder().title("微信支付案例接口文档")
+                                                                                   .build());
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
  * @date 12:06 2023/8/24
  */
 @Service
-public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, PaymentInfo> implements PaymentInfoService {
+public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, PaymentInfo> implements PaymentInfoService
+{
 
 }

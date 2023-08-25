@@ -26,8 +26,8 @@ import java.security.PrivateKey;
 @PropertySource("classpath:wxpay.properties")
 @ConfigurationProperties(prefix = "wxpay")
 @Data
-public class WxPayConfig {
-
+public class WxPayConfig
+{
     /**
      * 商户号
      */
@@ -71,10 +71,14 @@ public class WxPayConfig {
      * @author wxz
      * @date 10:53 2023/8/25
      */
-    public PrivateKey getPrivateKey(String filePath) {
-        try {
+    public PrivateKey getPrivateKey(String filePath)
+    {
+        try
+        {
             return PemUtil.loadPrivateKey(new FileInputStream(filePath));
-        } catch (FileNotFoundException e) {
+        }
+        catch (FileNotFoundException e)
+        {
             throw new RuntimeException("私钥文件不存在", e);
         }
     }
@@ -87,7 +91,8 @@ public class WxPayConfig {
      * @date 11:10 2023/8/25
      */
     @Bean
-    public ScheduledUpdateCertificatesVerifier getVerifier() {
+    public ScheduledUpdateCertificatesVerifier getVerifier()
+    {
         // 获取商户私钥
         PrivateKey privateKey = getPrivateKey(privateKeyPath);
         // 私钥签名对象
@@ -106,7 +111,8 @@ public class WxPayConfig {
      * @date 11:15 2023/8/25
      */
     @Bean
-    public CloseableHttpClient getWxPayClient(ScheduledUpdateCertificatesVerifier verifier) {
+    public CloseableHttpClient getWxPayClient(ScheduledUpdateCertificatesVerifier verifier)
+    {
         return WechatPayHttpClientBuilder.create()
                                          .withMerchant(mchId, mchSerialNo, getPrivateKey(privateKeyPath))
                                          .withValidator(new WechatPay2Validator(verifier)).build();

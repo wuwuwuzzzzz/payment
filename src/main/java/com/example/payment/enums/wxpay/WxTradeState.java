@@ -9,8 +9,8 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum WxTradeState {
-
+public enum WxTradeState
+{
     /**
      * 支付成功
      */

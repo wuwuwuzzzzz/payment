@@ -9,7 +9,8 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum OrderStatus {
+public enum OrderStatus
+{
     /**
      * 未支付
      */

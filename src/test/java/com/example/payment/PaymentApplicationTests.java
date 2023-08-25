@@ -7,14 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import javax.annotation.Resource;
 
 @SpringBootTest
-class PaymentApplicationTests {
-
+class PaymentApplicationTests
+{
     @Resource
     private WxPayConfig wxPayConfig;
 
     @Test
-    void test() {
+    void test()
+    {
         System.out.println(wxPayConfig.getPrivateKey(wxPayConfig.getPrivateKeyPath()));
     }
-
 }

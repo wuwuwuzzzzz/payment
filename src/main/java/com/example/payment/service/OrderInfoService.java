@@ -7,6 +7,7 @@ import com.example.payment.entity.OrderInfo;
  * @author wxz
  * @date 12:04 2023/8/24
  */
-public interface OrderInfoService extends IService<OrderInfo> {
+public interface OrderInfoService extends IService<OrderInfo>
+{
 
 }

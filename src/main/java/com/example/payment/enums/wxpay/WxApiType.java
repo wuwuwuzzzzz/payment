@@ -9,8 +9,8 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum WxApiType {
-
+public enum WxApiType
+{
     /**
      * Native下单
      */

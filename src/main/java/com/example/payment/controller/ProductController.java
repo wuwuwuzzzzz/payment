@@ -22,14 +22,20 @@ import java.util.List;
 @Api(tags = "商品管理")
 @RestController
 @RequestMapping("/api/product")
-public class ProductController {
-
+public class ProductController
+{
     @Autowired
     private ProductService productService;
 
+    /**
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 11:56 2023/8/25
+     */
     @ApiOperation("测试接口")
     @GetMapping("/test")
-    public R test() {
+    public R test()
+    {
         return R.ok().data("now", new Date());
     }
 
@@ -39,7 +45,8 @@ public class ProductController {
      * @date 12:11 2023/8/24
      */
     @GetMapping("/list")
-    public R list() {
+    public R list()
+    {
         List<Product> list = productService.list();
         return R.ok().data("productList", list);
     }

@@ -10,7 +10,8 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum PayType {
+public enum PayType
+{
     /**
      * 微信
      */

@@ -9,8 +9,8 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum WxRefundStatus {
-
+public enum WxRefundStatus
+{
     /**
      * 退款成功
      */

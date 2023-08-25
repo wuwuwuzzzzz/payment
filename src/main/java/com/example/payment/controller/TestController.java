@@ -16,13 +16,19 @@ import javax.annotation.Resource;
 @Api(tags = "测试")
 @RestController
 @RequestMapping("/api/test")
-public class TestController {
-
+public class TestController
+{
     @Resource
     private WxPayConfig wxPayConfig;
 
+    /**
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 11:56 2023/8/25
+     */
     @GetMapping
-    public R getWxPayConfig() {
+    public R getWxPayConfig()
+    {
         String mchId = wxPayConfig.getMchId();
         return R.ok().data("wxPayConfig", mchId);
     }

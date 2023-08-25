@@ -9,8 +9,8 @@ import lombok.Getter;
  */
 @AllArgsConstructor
 @Getter
-public enum WxNotifyType {
-
+public enum WxNotifyType
+{
     /**
      * 支付通知
      */

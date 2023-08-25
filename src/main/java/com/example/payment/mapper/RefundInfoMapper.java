@@ -7,6 +7,7 @@ import com.example.payment.entity.RefundInfo;
  * @author wxz
  * @date 12:03 2023/8/24
  */
-public interface RefundInfoMapper extends BaseMapper<RefundInfo> {
+public interface RefundInfoMapper extends BaseMapper<RefundInfo>
+{
 
 }

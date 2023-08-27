@@ -8,14 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 
 /**
  * @author wxz
  * @date 11:39 2023/8/25
  */
-@CrossOrigin(origins = "http://localhost:8080", maxAge = 3600)
+@CrossOrigin
 @RestController
-@RequestMapping("/api/wxpay")
+@RequestMapping("/api/wx-pay")
 @Api(tags = "微信支付")
 @Slf4j
 public class WxPayController
@@ -29,8 +30,8 @@ public class WxPayController
      * @date 11:56 2023/8/25
      */
     @ApiOperation(("调用统一下单API，生成支付二维码"))
-    @GetMapping("/nativePay/{productId}")
-    public R nativePay(@PathVariable("productId") Long productId)
+    @PostMapping("/native/{productId}")
+    public R nativePay(@PathVariable("productId") Long productId) throws IOException
     {
         log.info("发起支付请求");
         return R.ok().setData(wxPayService.nativePay(productId));

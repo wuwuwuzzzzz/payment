@@ -47,6 +47,24 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     }
 
     /**
+     * 保存二维码
+     *
+     * @param orderNo 订单编号
+     * @param codeUrl 二维码
+     * @author wxz
+     * @date 11:24 2023/8/28
+     */
+    @Override
+    public void saveCodeUrl(String orderNo, String codeUrl)
+    {
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_no", orderNo);
+        OrderInfo info = new OrderInfo();
+        info.setCodeUrl(codeUrl);
+        baseMapper.update(info, wrapper);
+    }
+
+    /**
      * 查找已存在但未支付的订单
      *
      * @param productId 商品ID

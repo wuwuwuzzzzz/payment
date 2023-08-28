@@ -7,6 +7,7 @@ import com.wechat.pay.contrib.apache.httpclient.auth.WechatPay2Credentials;
 import com.wechat.pay.contrib.apache.httpclient.auth.WechatPay2Validator;
 import com.wechat.pay.contrib.apache.httpclient.util.PemUtil;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,7 @@ import java.security.PrivateKey;
 @PropertySource("classpath:wxpay.properties")
 @ConfigurationProperties(prefix = "wxpay")
 @Data
+@Slf4j
 public class WxPayConfig
 {
     /**
@@ -93,6 +95,7 @@ public class WxPayConfig
     @Bean
     public ScheduledUpdateCertificatesVerifier getVerifier()
     {
+        log.info("初始化签名验证器");
         // 获取商户私钥
         PrivateKey privateKey = getPrivateKey(privateKeyPath);
         // 私钥签名对象
@@ -113,6 +116,7 @@ public class WxPayConfig
     @Bean
     public CloseableHttpClient getWxPayClient(ScheduledUpdateCertificatesVerifier verifier)
     {
+        log.info("初始化HTTP请求对象");
         return WechatPayHttpClientBuilder.create()
                                          .withMerchant(mchId, mchSerialNo, getPrivateKey(privateKeyPath))
                                          .withValidator(new WechatPay2Validator(verifier)).build();

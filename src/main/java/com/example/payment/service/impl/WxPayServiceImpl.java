@@ -2,11 +2,10 @@ package com.example.payment.service.impl;
 
 import com.example.payment.config.WxPayConfig;
 import com.example.payment.entity.OrderInfo;
-import com.example.payment.enums.OrderStatus;
 import com.example.payment.enums.wxpay.WxApiType;
 import com.example.payment.enums.wxpay.WxNotifyType;
+import com.example.payment.service.OrderInfoService;
 import com.example.payment.service.WxPayService;
-import com.example.payment.util.OrderNoUtils;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -36,6 +35,9 @@ public class WxPayServiceImpl implements WxPayService
     @Resource
     private CloseableHttpClient httpClient;
 
+    @Resource
+    private OrderInfoService orderInfoService;
+
     /**
      * 创建订单调用native接口
      *
@@ -50,12 +52,7 @@ public class WxPayServiceImpl implements WxPayService
         log.info("生成订单");
 
         // 生成订单
-        OrderInfo info = new OrderInfo();
-        info.setTitle("测试商品");
-        info.setOrderNo(OrderNoUtils.getOrderNo());
-        info.setProductId(productId);
-        info.setTotalFee(1);
-        info.setOrderStatus(OrderStatus.NOTPAY.getType());
+        OrderInfo info = orderInfoService.createOrderByProductId(productId);
 
         // TODO 存入数据库
 
@@ -73,7 +70,7 @@ public class WxPayServiceImpl implements WxPayService
         httpPost.setEntity(entity);
         httpPost.setHeader("Accept", "application/json");
 
-        //完成签名并执行请求
+        // 完成签名并执行请求
         try (CloseableHttpResponse response = httpClient.execute(httpPost))
         {
             String bodyAsString = EntityUtils.toString(response.getEntity());

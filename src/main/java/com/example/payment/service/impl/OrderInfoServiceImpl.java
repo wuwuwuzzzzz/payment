@@ -12,6 +12,7 @@ import com.example.payment.util.OrderNoUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author wxz
@@ -62,6 +63,20 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         OrderInfo info = new OrderInfo();
         info.setCodeUrl(codeUrl);
         baseMapper.update(info, wrapper);
+    }
+
+    /**
+     * 获取订单列表
+     *
+     * @return java.util.List<com.example.payment.entity.OrderInfo>
+     * @author wxz
+     * @date 17:14 2023/8/28
+     */
+    @Override
+    public List<OrderInfo> listOrderByCreateTimeDesc()
+    {
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<OrderInfo>().orderByDesc("create_time");
+        return baseMapper.selectList(wrapper);
     }
 
     /**

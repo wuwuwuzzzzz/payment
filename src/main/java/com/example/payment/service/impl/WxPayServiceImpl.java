@@ -56,7 +56,7 @@ public class WxPayServiceImpl implements WxPayService
 
         // 生成订单
         OrderInfo info = orderInfoService.createOrderByProductId(productId);
-        if (info != null && !StringUtils.hasText(info.getCodeUrl()))
+        if (info != null && StringUtils.hasText(info.getCodeUrl()))
         {
             log.info("订单已存在，直接返回二维码");
 

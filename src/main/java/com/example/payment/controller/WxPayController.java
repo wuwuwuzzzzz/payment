@@ -1,14 +1,21 @@
 package com.example.payment.controller;
 
 import com.example.payment.service.WxPayService;
+import com.example.payment.util.HttpUtils;
 import com.example.payment.vo.R;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author wxz
@@ -35,5 +42,47 @@ public class WxPayController
     {
         log.info("发起支付请求");
         return R.ok().setData(wxPayService.nativePay(productId));
+    }
+
+    /**
+     * 支付通知
+     *
+     * @return java.lang.String
+     * @author wxz
+     * @date 20:06 2023/8/28
+     */
+    @PostMapping("/native/notify")
+    public String nativeNotify(HttpServletRequest request, HttpServletResponse response)
+    {
+        Gson gson = new Gson();
+        // 应答对象
+        HashMap<Object, Object> map = new HashMap<>(10);
+        try
+        {
+            // 处理通知参数
+            String body = HttpUtils.readData(request);
+            Map<String, Object> bodyMap = gson.fromJson(body, HashMap.class);
+
+            log.info("微信支付通知参数：{}", bodyMap);
+
+            // TODO 验证签名
+            // TODO 处理订单
+
+            // 成功应答
+            response.setStatus(200);
+            map.put("code", "SUCCESS");
+            map.put("msg", "成功");
+
+            return gson.toJson(map);
+        }
+        catch (JsonSyntaxException e)
+        {
+            // 失败应答
+            response.setStatus(500);
+            map.put("code", "ERROR");
+            map.put("msg", "失败");
+
+            return gson.toJson(map);
+        }
     }
 }

@@ -236,6 +236,7 @@ public class WxPayServiceImpl implements WxPayService
         catch (IOException e)
         {
             log.error("查询订单失败", e);
+
             return null;
         }
     }
@@ -430,6 +431,168 @@ public class WxPayServiceImpl implements WxPayService
         catch (IOException e)
         {
             log.error("查询退款失败", e);
+
+            return null;
+        }
+    }
+
+    /**
+     * 处理退款单
+     *
+     * @param bodyMap 退款信息参数
+     * @author wxz
+     * @date 15:49 2023/8/29
+     */
+    @Override
+    public void processRefund(Map<String, Object> bodyMap) throws Exception
+    {
+        log.info("处理退款单");
+
+        // 解密报文
+        String plainText = decryptFromResource(bodyMap);
+
+        // 将明文转换成map
+        Gson gson = new Gson();
+        Map<String, Object> plainTextMap = gson.fromJson(plainText, HashMap.class);
+        String orderNo = (String) plainTextMap.get("out_refund_no");
+
+        if (lock.tryLock())
+        {
+            try
+            {
+                String orderStatus = orderInfoService.getOrderStatus(orderNo);
+                if (!OrderStatus.REFUND_PROCESSING.getType().equals(orderStatus))
+                {
+                    log.info("订单已退款，直接返回");
+
+                    return;
+                }
+
+                // 更新订单状态
+                orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.REFUND_SUCCESS);
+
+                // 更新退款单
+                refundInfoService.updateRefund(plainText);
+            }
+            finally
+            {
+                lock.unlock();
+            }
+        }
+    }
+
+    /**
+     * 获取账单URL
+     *
+     * @param billDate billDate
+     * @param type     type
+     * @return java.lang.String
+     * @author wxz
+     * @date 16:00 2023/8/29
+     */
+    @Override
+    public String queryBill(String billDate, String type)
+    {
+        log.warn("申请账单");
+
+        String url = "";
+
+        if ("tradebill".equals(type))
+        {
+            url = WxApiType.TRADE_BILLS.getType();
+        }
+        else if ("fundflowbill".equals(type))
+        {
+            url = WxApiType.FUND_FLOW_BILLS.getType();
+        }
+        else
+        {
+            throw new RuntimeException("账单类型错误");
+        }
+
+        url = wxPayConfig.getDomain().concat(url).concat("?bill_date=").concat(billDate);
+
+        // 创建远程请求GET对象
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("Accept", "application/json");
+
+        // 完成签名并执行请求
+        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        {
+            String bodyAsString = EntityUtils.toString(response.getEntity());
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 200)
+            {
+                log.info("success,return body = " + bodyAsString);
+            }
+            else if (statusCode == 204)
+            {
+                log.info("success");
+            }
+            else
+            {
+                log.info("failed,resp code = " + statusCode + ",return body = " + bodyAsString);
+                throw new IOException("request failed");
+            }
+
+            // 获取账单下载地址
+            Gson gson = new Gson();
+            Map<String, String> resultMap = gson.fromJson(bodyAsString, HashMap.class);
+            return resultMap.get("download_url");
+        }
+        catch (IOException e)
+        {
+            log.error("申请账单失败", e);
+
+            return null;
+        }
+    }
+
+    /**
+     * 下载账单
+     *
+     * @param billDate billDate
+     * @param type     type
+     * @return java.lang.String
+     * @author wxz
+     * @date 16:10 2023/8/29
+     */
+    @Override
+    public String downloadBill(String billDate, String type)
+    {
+        log.warn("下载账单");
+
+        // 获取账单URL地址
+        String url = this.queryBill(billDate, type);
+        // 创建远程请求GET对象
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("Accept", "application/json");
+
+        // 使用wxPayClient完成签名并执行请求
+        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        {
+            String bodyAsString = EntityUtils.toString(response.getEntity());
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 200)
+            {
+                log.info("success,return body = " + bodyAsString);
+            }
+            else if (statusCode == 204)
+            {
+                log.info("success");
+            }
+            else
+            {
+                log.info("failed,resp code = " + statusCode + ",return body = " + bodyAsString);
+                throw new IOException("request failed");
+            }
+
+            return bodyAsString;
+        }
+        catch (IOException e)
+        {
+            log.error("下载账单失败", e);
+
             return null;
         }
     }

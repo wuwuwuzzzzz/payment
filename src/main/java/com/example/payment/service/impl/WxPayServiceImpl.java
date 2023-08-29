@@ -6,6 +6,7 @@ import com.example.payment.entity.RefundInfo;
 import com.example.payment.enums.OrderStatus;
 import com.example.payment.enums.wxpay.WxApiType;
 import com.example.payment.enums.wxpay.WxNotifyType;
+import com.example.payment.enums.wxpay.WxTradeState;
 import com.example.payment.service.OrderInfoService;
 import com.example.payment.service.PaymentInfoService;
 import com.example.payment.service.RefundInfoService;
@@ -260,7 +261,7 @@ public class WxPayServiceImpl implements WxPayService
             // 获取微信支付端的订单状态
             String tradeState = (String) orderMap.get("trade_state");
             // 判断订单状态
-            if (OrderStatus.SUCCESS.getType().equals(tradeState))
+            if (WxTradeState.SUCCESS.getType().equals(tradeState))
             {
                 log.warn("订单已支付:{}", orderNo);
 
@@ -270,7 +271,7 @@ public class WxPayServiceImpl implements WxPayService
                 // 记录支付日志
                 paymentInfoService.createPaymentInfo(result);
             }
-            else if (OrderStatus.NOTPAY.getType().equals(tradeState))
+            else if (WxTradeState.NOTPAY.getType().equals(tradeState))
             {
                 log.warn("订单未支付");
 

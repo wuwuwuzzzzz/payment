@@ -48,6 +48,13 @@ public interface WxPayService
      */
     Object queryOrder(String orderNo);
 
+    /**
+     * 核实订单状态
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 11:55 2023/8/29
+     */
     void checkOrderStatus(String orderNo);
 
     /**

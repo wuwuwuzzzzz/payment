@@ -49,4 +49,14 @@ public interface WxPayService
     Object queryOrder(String orderNo);
 
     void checkOrderStatus(String orderNo);
+
+    /**
+     * 退款
+     *
+     * @param orderNo 订单编号
+     * @param reason  退款原因
+     * @author wxz
+     * @date 14:24 2023/8/29
+     */
+    void reFund(String orderNo, String reason);
 }

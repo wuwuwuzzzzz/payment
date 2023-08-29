@@ -70,4 +70,14 @@ public interface OrderInfoService extends IService<OrderInfo>
      * @date 11:36 2023/8/29
      */
     List<OrderInfo> getNoPayOrderByDuration(int minutes);
+
+    /**
+     * 根据订单编号获取订单
+     *
+     * @param orderNo 订单编号
+     * @return com.example.payment.entity.OrderInfo
+     * @author wxz
+     * @date 14:34 2023/8/29
+     */
+    OrderInfo getOrderByOrderNo(String orderNo);
 }

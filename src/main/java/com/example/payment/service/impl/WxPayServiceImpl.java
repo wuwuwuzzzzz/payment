@@ -2,11 +2,13 @@ package com.example.payment.service.impl;
 
 import com.example.payment.config.WxPayConfig;
 import com.example.payment.entity.OrderInfo;
+import com.example.payment.entity.RefundInfo;
 import com.example.payment.enums.OrderStatus;
 import com.example.payment.enums.wxpay.WxApiType;
 import com.example.payment.enums.wxpay.WxNotifyType;
 import com.example.payment.service.OrderInfoService;
 import com.example.payment.service.PaymentInfoService;
+import com.example.payment.service.RefundInfoService;
 import com.example.payment.service.WxPayService;
 import com.google.gson.Gson;
 import com.wechat.pay.contrib.apache.httpclient.util.AesUtil;
@@ -18,6 +20,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -48,6 +51,9 @@ public class WxPayServiceImpl implements WxPayService
 
     @Resource
     private PaymentInfoService paymentInfoService;
+
+    @Resource
+    private RefundInfoService refundInfoService;
 
     /**
      * 创建订单调用native接口
@@ -275,6 +281,91 @@ public class WxPayServiceImpl implements WxPayService
             {
                 log.info("订单状态未知");
             }
+        }
+    }
+
+    /**
+     * 退款
+     *
+     * @param orderNo 订单编号
+     * @param reason  退款原因
+     * @author wxz
+     * @date 14:24 2023/8/29
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void reFund(String orderNo, String reason)
+    {
+        log.info("创建退款单记录");
+
+        // 根据订单编号创建退款单
+        RefundInfo refundInfo = refundInfoService.createRefundInfoByOrderNo(orderNo, reason);
+
+        log.info("调用微信支付的退款接口");
+
+        // 调用微信支付的退款接口
+        String url = wxPayConfig.getDomain().concat(WxApiType.DOMESTIC_REFUNDS.getType());
+        HttpPost httpPost = new HttpPost(url);
+
+        // 请求body参数
+        Gson gson = new Gson();
+        Map<String, Object> paramsMap = new HashMap<>(10);
+        // 订单编号
+        paramsMap.put("out_trade_no", orderNo);
+        // 退款单编号
+        paramsMap.put("out_refund_no", refundInfo.getRefundNo());
+        // 退款原因
+        paramsMap.put("reason", reason);
+        // 退款通知地址
+        paramsMap.put("notify_url", wxPayConfig.getNotifyDomain().concat(WxNotifyType.REFUND_NOTIFY.getType()));
+
+        HashMap<Object, Object> amountMap = new HashMap<>(10);
+        // 退款金额
+        amountMap.put("refund", refundInfo.getRefund());
+        // 原订单金额
+        amountMap.put("total", refundInfo.getTotalFee());
+        // 币种
+        amountMap.put("currency", "CNY");
+        paramsMap.put("amount", amountMap);
+
+        // 将参数转换成JSON字符串
+        String jsonParams = gson.toJson(paramsMap);
+
+        log.info("请求参数：{}", jsonParams);
+
+        StringEntity entity = new StringEntity(jsonParams, StandardCharsets.UTF_8);
+        entity.setContentType("application/json");
+        httpPost.setEntity(entity);
+        httpPost.setHeader("Accept", "application/json");
+
+        // 完成签名并执行请求
+        try (CloseableHttpResponse response = httpClient.execute(httpPost))
+        {
+            String bodyAsString = EntityUtils.toString(response.getEntity());
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 200)
+            {
+                log.info("success,return body = " + bodyAsString);
+            }
+            else if (statusCode == 204)
+            {
+                log.info("success");
+            }
+            else
+            {
+                log.info("failed,resp code = " + statusCode + ",return body = " + bodyAsString);
+                throw new IOException("request failed");
+            }
+
+            // 更新订单状态
+            orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.REFUND_PROCESSING);
+
+            // 更新退款单
+            refundInfoService.updateRefund(bodyAsString);
+        }
+        catch (IOException e)
+        {
+            log.error("退款失败", e);
         }
     }
 

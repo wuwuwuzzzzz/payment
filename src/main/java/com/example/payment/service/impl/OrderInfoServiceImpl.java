@@ -145,6 +145,22 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     }
 
     /**
+     * 根据订单编号获取订单
+     *
+     * @param orderNo 订单编号
+     * @return com.example.payment.entity.OrderInfo
+     * @author wxz
+     * @date 14:34 2023/8/29
+     */
+    @Override
+    public OrderInfo getOrderByOrderNo(String orderNo)
+    {
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_no", orderNo);
+        return baseMapper.selectOne(wrapper);
+    }
+
+    /**
      * 查找已存在但未支付的订单
      *
      * @param productId 商品ID

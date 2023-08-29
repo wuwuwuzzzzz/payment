@@ -139,4 +139,23 @@ public class WxPayController
 
         return R.ok().setMsg("查询成功").data("result", wxPayService.queryOrder(orderNo));
     }
+
+    /**
+     * 退款
+     *
+     * @param orderNo 订单编号
+     * @param reason  退款原因
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 14:23 2023/8/29
+     */
+    @ApiOperation("退款")
+    @PostMapping("/refunds/{orderNo}/{reason}")
+    public R reFunds(@PathVariable String orderNo, @PathVariable String reason)
+    {
+        log.info("退款");
+
+        wxPayService.reFund(orderNo, reason);
+        return R.ok();
+    }
 }

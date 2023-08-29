@@ -37,4 +37,16 @@ public interface WxPayService
      * @date 10:39 2023/8/29
      */
     void cancelOrder(String orderNo);
+
+    /**
+     * 查询订单
+     *
+     * @param orderNo 订单编号
+     * @return java.lang.Object
+     * @author wxz
+     * @date 11:18 2023/8/29
+     */
+    Object queryOrder(String orderNo);
+
+    void checkOrderStatus(String orderNo);
 }

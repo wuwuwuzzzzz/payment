@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -122,6 +124,24 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             return null;
         }
         return info.getOrderStatus();
+    }
+
+    /**
+     * 查询创建超过minutes分钟的未支付订单
+     *
+     * @param minutes 分钟
+     * @return java.util.List<com.example.payment.entity.OrderInfo>
+     * @author wxz
+     * @date 11:38 2023/8/29
+     */
+    @Override
+    public List<OrderInfo> getNoPayOrderByDuration(int minutes)
+    {
+        Instant instant = Instant.now().minus(Duration.ofMillis(minutes));
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_status", OrderStatus.NOTPAY.getType());
+        wrapper.le("create_time", instant);
+        return baseMapper.selectList(wrapper);
     }
 
     /**

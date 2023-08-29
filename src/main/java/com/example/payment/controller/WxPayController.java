@@ -123,4 +123,20 @@ public class WxPayController
         wxPayService.cancelOrder(orderNo);
         return R.ok().setMsg("取消成功");
     }
+
+    /**
+     * 查询订单
+     *
+     * @param orderNo 订单编号
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 11:16 2023/8/29
+     */
+    @GetMapping("/query/{orderNo}")
+    public R queryOrder(@PathVariable String orderNo)
+    {
+        log.info("查询订单");
+
+        return R.ok().setMsg("查询成功").data("result", wxPayService.queryOrder(orderNo));
+    }
 }

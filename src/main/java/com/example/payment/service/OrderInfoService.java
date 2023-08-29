@@ -60,4 +60,14 @@ public interface OrderInfoService extends IService<OrderInfo>
      * @date 10:11 2023/8/29
      */
     String getOrderStatus(String orderNo);
+
+    /**
+     * 查询创建超过minutes分钟的未支付订单
+     *
+     * @param minutes 分钟
+     * @return java.util.List<com.example.payment.entity.OrderInfo>
+     * @author wxz
+     * @date 11:36 2023/8/29
+     */
+    List<OrderInfo> getNoPayOrderByDuration(int minutes);
 }

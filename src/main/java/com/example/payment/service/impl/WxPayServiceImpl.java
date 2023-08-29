@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import com.wechat.pay.contrib.apache.httpclient.util.AesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -184,6 +185,97 @@ public class WxPayServiceImpl implements WxPayService
 
         // 更新订单状态
         orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.CANCEL);
+    }
+
+    /**
+     * 查询订单
+     *
+     * @param orderNo 订单编号
+     * @return java.lang.Object
+     * @author wxz
+     * @date 11:18 2023/8/29
+     */
+    @Override
+    public Object queryOrder(String orderNo)
+    {
+        log.info("查询订单编号：{}", orderNo);
+
+        String url = String.format(WxApiType.ORDER_QUERY_BY_NO.getType(), orderNo);
+        url = wxPayConfig.getDomain().concat(url).concat("?mchid=").concat(wxPayConfig.getMchId());
+
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("Accept", "application/json");
+
+        // 完成签名并执行请求
+        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        {
+            String bodyAsString = EntityUtils.toString(response.getEntity());
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 200)
+            {
+                log.info("success,return body = " + bodyAsString);
+            }
+            else if (statusCode == 204)
+            {
+                log.info("success");
+            }
+            else
+            {
+                log.info("failed,resp code = " + statusCode + ",return body = " + bodyAsString);
+                throw new IOException("request failed");
+            }
+            return bodyAsString;
+        }
+        catch (IOException e)
+        {
+            log.error("查询订单失败", e);
+            return null;
+        }
+    }
+
+    /**
+     * 核实订单状态
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 11:55 2023/8/29
+     */
+    @Override
+    public void checkOrderStatus(String orderNo)
+    {
+        log.info("核实订单状态");
+
+        // 查询订单
+        String result = (String) this.queryOrder(orderNo);
+        if (StringUtils.hasText(result))
+        {
+            Gson gson = new Gson();
+            Map<String, Object> orderMap = gson.fromJson(result, HashMap.class);
+            // 获取微信支付端的订单状态
+            String tradeState = (String) orderMap.get("trade_state");
+            // 判断订单状态
+            if (OrderStatus.SUCCESS.getType().equals(tradeState))
+            {
+                log.warn("订单已支付:{}", orderNo);
+
+                // 更新订单状态
+                orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.SUCCESS);
+
+                // 记录支付日志
+                paymentInfoService.createPaymentInfo(result);
+            }
+            else if (OrderStatus.NOTPAY.getType().equals(tradeState))
+            {
+                log.warn("订单未支付");
+
+                // 更新订单状态
+                orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.CLOSED);
+            }
+            else
+            {
+                log.info("订单状态未知");
+            }
+        }
     }
 
     /**

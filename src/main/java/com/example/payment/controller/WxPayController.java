@@ -2,9 +2,10 @@ package com.example.payment.controller;
 
 import com.example.payment.service.WxPayService;
 import com.example.payment.util.HttpUtils;
+import com.example.payment.util.WechatPay2ValidatorForRequest;
 import com.example.payment.vo.R;
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.wechat.pay.contrib.apache.httpclient.auth.Verifier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,9 @@ public class WxPayController
 {
     @Resource
     private WxPayService wxPayService;
+
+    @Resource
+    private Verifier verifier;
 
     /**
      * @return com.example.payment.vo.R
@@ -66,6 +70,22 @@ public class WxPayController
             log.info("微信支付通知参数：{}", bodyMap);
 
             // TODO 验证签名
+            WechatPay2ValidatorForRequest wechatPay2ValidatorForRequest = new WechatPay2ValidatorForRequest(verifier, body, bodyMap.get("id")
+                                                                                                                                   .toString());
+            if (!wechatPay2ValidatorForRequest.validate(request))
+            {
+                log.error("验签失败");
+
+                // 失败应答
+                response.setStatus(500);
+                map.put("code", "ERROR");
+                map.put("msg", "验签失败");
+
+                return gson.toJson(map);
+            }
+
+            log.info("验签成功");
+
             // TODO 处理订单
 
             // 成功应答
@@ -75,7 +95,7 @@ public class WxPayController
 
             return gson.toJson(map);
         }
-        catch (JsonSyntaxException e)
+        catch (Exception e)
         {
             // 失败应答
             response.setStatus(500);

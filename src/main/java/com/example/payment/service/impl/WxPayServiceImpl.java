@@ -309,28 +309,7 @@ public class WxPayServiceImpl implements WxPayService
         HttpPost httpPost = new HttpPost(url);
 
         // 请求body参数
-        Gson gson = new Gson();
-        Map<String, Object> paramsMap = new HashMap<>(10);
-        // 订单编号
-        paramsMap.put("out_trade_no", orderNo);
-        // 退款单编号
-        paramsMap.put("out_refund_no", refundInfo.getRefundNo());
-        // 退款原因
-        paramsMap.put("reason", reason);
-        // 退款通知地址
-        paramsMap.put("notify_url", wxPayConfig.getNotifyDomain().concat(WxNotifyType.REFUND_NOTIFY.getType()));
-
-        HashMap<Object, Object> amountMap = new HashMap<>(10);
-        // 退款金额
-        amountMap.put("refund", refundInfo.getRefund());
-        // 原订单金额
-        amountMap.put("total", refundInfo.getTotalFee());
-        // 币种
-        amountMap.put("currency", "CNY");
-        paramsMap.put("amount", amountMap);
-
-        // 将参数转换成JSON字符串
-        String jsonParams = gson.toJson(paramsMap);
+        String jsonParams = getRefund(orderNo, reason, refundInfo);
 
         log.info("请求参数：{}", jsonParams);
 
@@ -367,6 +346,91 @@ public class WxPayServiceImpl implements WxPayService
         catch (IOException e)
         {
             log.error("退款失败", e);
+        }
+    }
+
+    /**
+     * 退款参数
+     *
+     * @param orderNo    订单编号
+     * @param reason     退款原因
+     * @param refundInfo 退款信息
+     * @return java.lang.String
+     * @author wxz
+     * @date 15:22 2023/8/29
+     */
+    private String getRefund(String orderNo, String reason, RefundInfo refundInfo)
+    {
+        Gson gson = new Gson();
+        Map<String, Object> paramsMap = new HashMap<>(10);
+        // 订单编号
+        paramsMap.put("out_trade_no", orderNo);
+        // 退款单编号
+        paramsMap.put("out_refund_no", refundInfo.getRefundNo());
+        // 退款原因
+        paramsMap.put("reason", reason);
+        // 退款通知地址
+        paramsMap.put("notify_url", wxPayConfig.getNotifyDomain().concat(WxNotifyType.REFUND_NOTIFY.getType()));
+
+        HashMap<Object, Object> amountMap = new HashMap<>(10);
+        // 退款金额
+        amountMap.put("refund", refundInfo.getRefund());
+        // 原订单金额
+        amountMap.put("total", refundInfo.getTotalFee());
+        // 币种
+        amountMap.put("currency", "CNY");
+        paramsMap.put("amount", amountMap);
+
+        // 将参数转换成JSON字符串
+        return gson.toJson(paramsMap);
+    }
+
+    /**
+     * 查询退款
+     *
+     * @param refundNo 退款编号
+     * @return java.lang.String
+     * @author wxz
+     * @date 15:16 2023/8/29
+     */
+    @Override
+    public String queryRefund(String refundNo)
+    {
+        log.info("查询退款");
+
+        String url = String.format(WxApiType.DOMESTIC_REFUNDS_QUERY.getType(), refundNo);
+        url = wxPayConfig.getDomain().concat(url);
+
+        // 创建远程请求GET对象
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("Accept", "application/json");
+
+        // 完成签名并执行请求
+        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        {
+            String bodyAsString = EntityUtils.toString(response.getEntity());
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 200)
+            {
+                log.info("success,return body = " + bodyAsString);
+            }
+            else if (statusCode == 204)
+            {
+                log.info("success");
+            }
+            else
+            {
+                log.info("failed,resp code = " + statusCode + ",return body = " + bodyAsString);
+                throw new IOException("request failed");
+            }
+
+            // 更新退款单
+            return bodyAsString;
+        }
+        catch (IOException e)
+        {
+            log.error("查询退款失败", e);
+            return null;
         }
     }
 

@@ -1,5 +1,7 @@
 package com.example.payment.service;
 
+import com.example.payment.entity.RefundInfo;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -66,4 +68,14 @@ public interface WxPayService
      * @date 14:24 2023/8/29
      */
     void reFund(String orderNo, String reason);
+
+    /**
+     * 查询退款
+     *
+     * @param refundNo 退款编号
+     * @return java.lang.String
+     * @author wxz
+     * @date 15:16 2023/8/29
+     */
+    String queryRefund(String refundNo);
 }

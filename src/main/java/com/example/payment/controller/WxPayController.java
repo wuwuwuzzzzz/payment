@@ -158,4 +158,20 @@ public class WxPayController
         wxPayService.reFund(orderNo, reason);
         return R.ok();
     }
+
+    /**
+     * 查询退款
+     *
+     * @param refundNo 退款编号
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 15:20 2023/8/29
+     */
+    @GetMapping("/query-refund/{refundNo}")
+    public R queryRefund(@PathVariable String refundNo)
+    {
+        log.info("查询退款");
+
+        return R.ok().setMsg("查询成功").data("result", wxPayService.queryRefund(refundNo));
+    }
 }

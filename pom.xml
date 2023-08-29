@@ -84,6 +84,13 @@
             <artifactId>gson</artifactId>
         </dependency>
 
+        <!--    支付宝SDK    -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.22.57.ALL</version>
+        </dependency>
+
     </dependencies>
 
     <build>

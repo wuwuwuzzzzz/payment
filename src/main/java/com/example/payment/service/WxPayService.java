@@ -28,4 +28,13 @@ public interface WxPayService
      * @date 09:18 2023/8/29
      */
     void processOrder(Map<String, Object> bodyMap) throws Exception;
+
+    /**
+     * 取消订单
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 10:39 2023/8/29
+     */
+    void cancelOrder(String orderNo);
 }

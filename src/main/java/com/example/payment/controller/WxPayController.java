@@ -106,4 +106,21 @@ public class WxPayController
             return gson.toJson(map);
         }
     }
+
+    /**
+     * 取消订单
+     *
+     * @param orderNo 订单编号
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 10:58 2023/8/29
+     */
+    @PostMapping("/cancel/{orderNo}")
+    public R cancel(@PathVariable("orderNo") String orderNo)
+    {
+        log.info("取消订单");
+
+        wxPayService.cancelOrder(orderNo);
+        return R.ok().setMsg("取消成功");
+    }
 }

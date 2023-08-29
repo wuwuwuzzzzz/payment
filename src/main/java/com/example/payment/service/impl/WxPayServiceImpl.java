@@ -35,12 +35,16 @@ import java.util.concurrent.locks.ReentrantLock;
 public class WxPayServiceImpl implements WxPayService
 {
     private final ReentrantLock lock = new ReentrantLock();
+
     @Resource
     private WxPayConfig wxPayConfig;
+
     @Resource
     private CloseableHttpClient httpClient;
+
     @Resource
     private OrderInfoService orderInfoService;
+
     @Resource
     private PaymentInfoService paymentInfoService;
 
@@ -69,8 +73,6 @@ public class WxPayServiceImpl implements WxPayService
             map.put("orderNo", info.getOrderNo());
             return map;
         }
-
-        // TODO 存入数据库
 
         log.info("调用统一下单API");
 
@@ -164,6 +166,76 @@ public class WxPayServiceImpl implements WxPayService
             {
                 lock.unlock();
             }
+        }
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 10:39 2023/8/29
+     */
+    @Override
+    public void cancelOrder(String orderNo)
+    {
+        // 调用微信支付的关单接口
+        this.closeOrder(orderNo);
+
+        // 更新订单状态
+        orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.CANCEL);
+    }
+
+    /**
+     * 关单接口的调用
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 10:41 2023/8/29
+     */
+    private void closeOrder(String orderNo)
+    {
+        log.info("订单编号：{}", orderNo);
+
+        // 创建远程请求对象
+        String url = String.format(WxApiType.CLOSE_ORDER_BY_NO.getType(), orderNo);
+        url = wxPayConfig.getDomain().concat(url);
+        HttpPost httpPost = new HttpPost(url);
+
+        // 组装JSON请求体
+        Map<String, String> paramsMap = new HashMap<>(10);
+        paramsMap.put("mchid", wxPayConfig.getMchId());
+        String jsonParams = new Gson().toJson(paramsMap);
+
+        log.info("请求参数：{}", jsonParams);
+
+        // 将请求参数设置到请求对象中
+        StringEntity entity = new StringEntity(jsonParams, StandardCharsets.UTF_8);
+        entity.setContentType("application/json");
+        httpPost.setEntity(entity);
+        httpPost.setHeader("Accept", "application/json");
+
+        // 完成签名并执行请求
+        try (CloseableHttpResponse response = httpClient.execute(httpPost))
+        {
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == 200)
+            {
+                log.info("success 200");
+            }
+            else if (statusCode == 204)
+            {
+                log.info("success 204");
+            }
+            else
+            {
+                log.info("failed,resp code = " + statusCode);
+                throw new IOException("request failed");
+            }
+        }
+        catch (IOException e)
+        {
+            log.error("关单失败", e);
         }
     }
 

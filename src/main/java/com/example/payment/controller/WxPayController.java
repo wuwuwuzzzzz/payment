@@ -69,7 +69,7 @@ public class WxPayController
 
             log.info("微信支付通知参数：{}", bodyMap);
 
-            // TODO 验证签名
+            // 验证签名
             WechatPay2ValidatorForRequest wechatPay2ValidatorForRequest = new WechatPay2ValidatorForRequest(verifier, body, bodyMap.get("id")
                                                                                                                                    .toString());
             if (!wechatPay2ValidatorForRequest.validate(request))
@@ -86,7 +86,8 @@ public class WxPayController
 
             log.info("验签成功");
 
-            // TODO 处理订单
+            //  处理订单
+            wxPayService.processOrder(bodyMap);
 
             // 成功应答
             response.setStatus(200);

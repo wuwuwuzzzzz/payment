@@ -2,11 +2,14 @@ package com.example.payment.service.impl;
 
 import com.example.payment.config.WxPayConfig;
 import com.example.payment.entity.OrderInfo;
+import com.example.payment.enums.OrderStatus;
 import com.example.payment.enums.wxpay.WxApiType;
 import com.example.payment.enums.wxpay.WxNotifyType;
 import com.example.payment.service.OrderInfoService;
+import com.example.payment.service.PaymentInfoService;
 import com.example.payment.service.WxPayService;
 import com.google.gson.Gson;
+import com.wechat.pay.contrib.apache.httpclient.util.AesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,7 +17,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
@@ -22,7 +24,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author wxz
@@ -32,14 +34,15 @@ import java.util.Objects;
 @Slf4j
 public class WxPayServiceImpl implements WxPayService
 {
+    private final ReentrantLock lock = new ReentrantLock();
     @Resource
     private WxPayConfig wxPayConfig;
-
     @Resource
     private CloseableHttpClient httpClient;
-
     @Resource
     private OrderInfoService orderInfoService;
+    @Resource
+    private PaymentInfoService paymentInfoService;
 
     /**
      * 创建订单调用native接口
@@ -116,6 +119,83 @@ public class WxPayServiceImpl implements WxPayService
 
             return map;
         }
+    }
+
+    /**
+     * 证书和回调解密
+     *
+     * @param bodyMap 回掉参数
+     * @author wxz
+     * @date 09:19 2023/8/29
+     */
+    @Override
+    public void processOrder(Map<String, Object> bodyMap) throws Exception
+    {
+        log.info("处理订单");
+
+        // 解密报文
+        String plainText = decryptFromResource(bodyMap);
+
+        // 将明文转换成map
+        Gson gson = new Gson();
+        Map<String, Object> plainTextMap = gson.fromJson(plainText, HashMap.class);
+        String orderNo = (String) plainTextMap.get("out_trade_no");
+
+        // 采用数据锁进行并发控制，以免函数重入造成的数据混乱
+        if (lock.tryLock())
+        {
+            try
+            {
+                // 处理重复的通知
+                String orderStatus = orderInfoService.getOrderStatus(orderNo);
+                if (!OrderStatus.NOTPAY.getType().equals(orderStatus))
+                {
+                    log.info("订单已支付，直接返回");
+
+                    return;
+                }
+                // 更新订单状态
+                orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.SUCCESS);
+
+                // 记录支付日志
+                paymentInfoService.createPaymentInfo(plainText);
+            }
+            finally
+            {
+                lock.unlock();
+            }
+        }
+    }
+
+    /**
+     * 对称解密
+     *
+     * @param bodyMap 回调参数
+     * @return java.lang.String
+     * @author wxz
+     * @date 09:22 2023/8/29
+     */
+    private String decryptFromResource(Map<String, Object> bodyMap) throws Exception
+    {
+        log.info("对称解密");
+
+        // 通知数据
+        Map<String, String> resourceMap = (Map) bodyMap.get("resource");
+        // 数据密文
+        String ciphertext = resourceMap.get("ciphertext");
+        // 随即串
+        String nonce = resourceMap.get("nonce");
+        // 附加数据
+        String associatedData = resourceMap.get("associated_data");
+
+        log.info("数据密文：{}", ciphertext);
+
+        AesUtil aesUtil = new AesUtil(wxPayConfig.getApiV3Key().getBytes(StandardCharsets.UTF_8));
+        String plainText = aesUtil.decryptToString(associatedData.getBytes(StandardCharsets.UTF_8), nonce.getBytes(StandardCharsets.UTF_8), ciphertext);
+
+        log.info("解密后的数据：{}", plainText);
+
+        return plainText;
     }
 
     /**

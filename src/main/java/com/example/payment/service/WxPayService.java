@@ -19,4 +19,13 @@ public interface WxPayService
      * @date 11:47 2023/8/25
      */
     Map<String, Object> nativePay(Long productId) throws IOException;
+
+    /**
+     * 证书和回调解密
+     *
+     * @param bodyMap 回调参数
+     * @author wxz
+     * @date 09:18 2023/8/29
+     */
+    void processOrder(Map<String, Object> bodyMap) throws Exception;
 }

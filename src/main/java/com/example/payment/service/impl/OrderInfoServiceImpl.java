@@ -9,6 +9,7 @@ import com.example.payment.mapper.OrderInfoMapper;
 import com.example.payment.mapper.ProductMapper;
 import com.example.payment.service.OrderInfoService;
 import com.example.payment.util.OrderNoUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -19,6 +20,7 @@ import java.util.List;
  * @date 12:05 2023/8/24
  */
 @Service
+@Slf4j
 public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo> implements OrderInfoService
 {
     @Resource
@@ -77,6 +79,49 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     {
         QueryWrapper<OrderInfo> wrapper = new QueryWrapper<OrderInfo>().orderByDesc("create_time");
         return baseMapper.selectList(wrapper);
+    }
+
+    /**
+     * 更新订单状态
+     *
+     * @param orderNo     订单编号
+     * @param orderStatus 订单状态
+     * @author wxz
+     * @date 09:40 2023/8/29
+     */
+    @Override
+    public void updateStatusByOrderNo(String orderNo, OrderStatus orderStatus)
+    {
+        log.info("更新订单状态");
+
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_no", orderNo);
+
+        OrderInfo info = new OrderInfo();
+        info.setOrderStatus(orderStatus.getType());
+
+        baseMapper.update(info, wrapper);
+    }
+
+    /**
+     * 查询订单状态
+     *
+     * @param orderNo 订单编号
+     * @return java.lang.String
+     * @author wxz
+     * @date 10:11 2023/8/29
+     */
+    @Override
+    public String getOrderStatus(String orderNo)
+    {
+        QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_no", orderNo);
+        OrderInfo info = baseMapper.selectOne(wrapper);
+        if (info == null)
+        {
+            return null;
+        }
+        return info.getOrderStatus();
     }
 
     /**

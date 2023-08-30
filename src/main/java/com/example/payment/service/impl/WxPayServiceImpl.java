@@ -45,7 +45,10 @@ public class WxPayServiceImpl implements WxPayService
     private WxPayConfig wxPayConfig;
 
     @Resource
-    private CloseableHttpClient httpClient;
+    private CloseableHttpClient wxPayClient;
+
+    @Resource
+    private CloseableHttpClient wxPayNoSignClient;
 
     @Resource
     private OrderInfoService orderInfoService;
@@ -98,7 +101,7 @@ public class WxPayServiceImpl implements WxPayService
         httpPost.setHeader("Accept", "application/json");
 
         // 完成签名并执行请求
-        try (CloseableHttpResponse response = httpClient.execute(httpPost))
+        try (CloseableHttpResponse response = wxPayClient.execute(httpPost))
         {
             String bodyAsString = EntityUtils.toString(response.getEntity());
             int statusCode = response.getStatusLine().getStatusCode();
@@ -214,7 +217,7 @@ public class WxPayServiceImpl implements WxPayService
         httpGet.setHeader("Accept", "application/json");
 
         // 完成签名并执行请求
-        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        try (CloseableHttpResponse response = wxPayClient.execute(httpGet))
         {
             String bodyAsString = EntityUtils.toString(response.getEntity());
             int statusCode = response.getStatusLine().getStatusCode();
@@ -320,7 +323,7 @@ public class WxPayServiceImpl implements WxPayService
         httpPost.setHeader("Accept", "application/json");
 
         // 完成签名并执行请求
-        try (CloseableHttpResponse response = httpClient.execute(httpPost))
+        try (CloseableHttpResponse response = wxPayClient.execute(httpPost))
         {
             String bodyAsString = EntityUtils.toString(response.getEntity());
             int statusCode = response.getStatusLine().getStatusCode();
@@ -407,7 +410,7 @@ public class WxPayServiceImpl implements WxPayService
         httpGet.setHeader("Accept", "application/json");
 
         // 完成签名并执行请求
-        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        try (CloseableHttpResponse response = wxPayClient.execute(httpGet))
         {
             String bodyAsString = EntityUtils.toString(response.getEntity());
             int statusCode = response.getStatusLine().getStatusCode();
@@ -517,7 +520,7 @@ public class WxPayServiceImpl implements WxPayService
         httpGet.setHeader("Accept", "application/json");
 
         // 完成签名并执行请求
-        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        try (CloseableHttpResponse response = wxPayClient.execute(httpGet))
         {
             String bodyAsString = EntityUtils.toString(response.getEntity());
             int statusCode = response.getStatusLine().getStatusCode();
@@ -569,7 +572,7 @@ public class WxPayServiceImpl implements WxPayService
         httpGet.setHeader("Accept", "application/json");
 
         // 使用wxPayClient完成签名并执行请求
-        try (CloseableHttpResponse response = httpClient.execute(httpGet))
+        try (CloseableHttpResponse response = wxPayNoSignClient.execute(httpGet))
         {
             String bodyAsString = EntityUtils.toString(response.getEntity());
             int statusCode = response.getStatusLine().getStatusCode();
@@ -627,7 +630,7 @@ public class WxPayServiceImpl implements WxPayService
         httpPost.setHeader("Accept", "application/json");
 
         // 完成签名并执行请求
-        try (CloseableHttpResponse response = httpClient.execute(httpPost))
+        try (CloseableHttpResponse response = wxPayClient.execute(httpPost))
         {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == 200)

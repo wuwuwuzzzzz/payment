@@ -1,6 +1,6 @@
 package com.example.payment.service;
 
-import com.alipay.api.AlipayApiException;
+import java.util.Map;
 
 /**
  * @author wxz
@@ -17,4 +17,13 @@ public interface AliPayService
      * @date 19:26 2023/8/29
      */
     String tradeCreate(Long productId);
+
+    /**
+     * 处理业务
+     *
+     * @param params 回调参数
+     * @author wxz
+     * @date 10:24 2023/8/30
+     */
+    void processOrder(Map<String, String> params);
 }

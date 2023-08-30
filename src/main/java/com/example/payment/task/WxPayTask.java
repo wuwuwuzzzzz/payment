@@ -32,7 +32,7 @@ public class WxPayTask
      * @author wxz
      * @date 11:33 2023/8/29
      */
-    @Scheduled(cron = "0/30 * * * * ?")
+//    @Scheduled(cron = "0/30 * * * * ?")
     public void orderConfirm()
     {
         List<OrderInfo> infoList = orderInfoService.getNoPayOrderByDuration(5);

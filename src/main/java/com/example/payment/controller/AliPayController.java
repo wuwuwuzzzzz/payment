@@ -1,12 +1,21 @@
 package com.example.payment.controller;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayConstants;
+import com.alipay.api.internal.util.AlipaySignature;
+import com.example.payment.entity.OrderInfo;
 import com.example.payment.service.AliPayService;
+import com.example.payment.service.OrderInfoService;
 import com.example.payment.vo.R;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Map;
 
 /**
  * @author wxz
@@ -21,6 +30,12 @@ public class AliPayController
 {
     @Resource
     private AliPayService aliPayService;
+
+    @Resource
+    private Environment config;
+
+    @Resource
+    private OrderInfoService orderInfoService;
 
     /**
      * 统一收单下单并支付页面接口
@@ -38,5 +53,89 @@ public class AliPayController
         String formStr = aliPayService.tradeCreate(productId);
 
         return R.ok().data("formStr", formStr);
+    }
+
+    /**
+     * 支付通知
+     *
+     * @return java.lang.String
+     * @author wxz
+     * @date 09:55 2023/8/30
+     */
+    @PostMapping("/trade/notify")
+    public String tradeNotify(@RequestParam Map<String, String> params) throws Exception
+    {
+        log.info("支付通知");
+
+        log.info("支付宝支付通知参数: {}", params);
+
+        // 调用SDK验证签名
+        boolean signVerified = AlipaySignature.rsaCheckV1(
+                params,
+                config.getProperty("alipay.alipay-public-key"),
+                AlipayConstants.CHARSET_UTF8,
+                AlipayConstants.SIGN_TYPE_RSA2);
+
+        if (!signVerified)
+        {
+            log.error("签名验证失败");
+
+            return "fail";
+        }
+
+        // 商家需要验证该通知数据中的 out_trade_no 是否为商家系统中创建的订单号
+        String outTradeNo = params.get("out_trade_no");
+        OrderInfo info = orderInfoService.getOrderByOrderNo(outTradeNo);
+        if (info == null)
+        {
+            log.error("订单不存在");
+
+            return "fail";
+        }
+
+        // 判断 total_amount 是否确实为该订单的实际金额（即商家订单创建时的金额）
+        String totalAmount = params.get("total_amount");
+        // 订单金额（分）
+        int totalAmountInt = new BigDecimal(totalAmount).multiply(new BigDecimal("100")).intValue();
+        // 订单金额（分）
+        int totalFeeInt = info.getTotalFee();
+        if (totalAmountInt != totalFeeInt)
+        {
+            log.error("订单金额不一致");
+
+            return "fail";
+        }
+
+        // 校验通知中的 seller_id（或者 seller_email) 是否为 out_trade_no 这笔单据的对应的操作方（有的时候，一个商家可能有多个 seller_id/seller_email）
+        String sellerId = params.get("seller_id");
+        if (!sellerId.equals(config.getProperty("alipay.seller-id")))
+        {
+            log.error("seller_id 不一致");
+
+            return "fail";
+        }
+
+        // 验证 app_id 是否为该商家本身
+        String appId = params.get("app_id");
+        if (!appId.equals(config.getProperty("alipay.app-id")))
+        {
+            log.error("app_id 不一致");
+
+            return "fail";
+        }
+
+        // 交易通知状态为 TRADE_SUCCESS 或 TRADE_FINISHED 时，支付宝才会认定为买家付款成功
+        String tradeStatus = params.get("trade_status");
+        if (!"TRADE_SUCCESS".equals(tradeStatus))
+        {
+            log.error("交易状态不正确");
+
+            return "fail";
+        }
+
+        // 处理业务
+        aliPayService.processOrder(params);
+
+        return "success";
     }
 }

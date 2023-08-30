@@ -64,4 +64,14 @@ public interface AliPayService
      * @date 14:54 2023/8/30
      */
     void refund(String orderNo, String reason);
+
+    /**
+     * 查询退款
+     *
+     * @param orderNo 订单编号
+     * @return java.lang.String
+     * @author wxz
+     * @date 15:29 2023/8/30
+     */
+    String queryRefund(String orderNo);
 }

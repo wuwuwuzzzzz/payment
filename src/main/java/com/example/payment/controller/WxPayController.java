@@ -251,7 +251,7 @@ public class WxPayController
     @GetMapping("/querybill/{billDate}/{type}")
     public R queryTradeBill(@PathVariable String billDate, @PathVariable String type)
     {
-        log.info("查询对账单");
+        log.info("查询账单");
 
         return R.ok().setMsg("查询成功").data("downloadUrl", wxPayService.queryBill(billDate, type));
     }

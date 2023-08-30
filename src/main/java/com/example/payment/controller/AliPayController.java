@@ -190,5 +190,20 @@ public class AliPayController
         return R.ok();
     }
 
+    /**
+     * 查询退款
+     *
+     * @param orderNo 订单编号
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 15:28 2023/8/30
+     */
+    @GetMapping("/trade/fastpay/refund/{orderNo}")
+    public R queryRefund(@PathVariable String orderNo)
+    {
+        log.info("查询退款");
+
+        return R.ok().setMsg("查询退款成功").data("result", aliPayService.queryRefund(orderNo));
+    }
 
 }

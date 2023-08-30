@@ -3,14 +3,8 @@ package com.example.payment.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
-import com.alipay.api.request.AlipayTradeCloseRequest;
-import com.alipay.api.request.AlipayTradePagePayRequest;
-import com.alipay.api.request.AlipayTradeQueryRequest;
-import com.alipay.api.request.AlipayTradeRefundRequest;
-import com.alipay.api.response.AlipayTradeCloseResponse;
-import com.alipay.api.response.AlipayTradePagePayResponse;
-import com.alipay.api.response.AlipayTradeQueryResponse;
-import com.alipay.api.response.AlipayTradeRefundResponse;
+import com.alipay.api.request.*;
+import com.alipay.api.response.*;
 import com.example.payment.entity.OrderInfo;
 import com.example.payment.entity.RefundInfo;
 import com.example.payment.enums.OrderStatus;
@@ -322,7 +316,7 @@ public class AliPayServiceImpl implements AliPayService
         bizContent.put("out_trade_no", orderNo);
         // 退款金额
         BigDecimal refund = new BigDecimal(refundInfo.getRefund()
-                                                      .toString()).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+                                                     .toString()).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
         bizContent.put("refund_amount", refund);
         // 退款原因
         bizContent.put("refund_reason", reason);
@@ -353,6 +347,48 @@ public class AliPayServiceImpl implements AliPayService
         catch (AlipayApiException e)
         {
             throw new RuntimeException("调用退款API失败");
+        }
+    }
+
+    /**
+     * 查询退款
+     *
+     * @param orderNo 订单编号
+     * @return java.lang.String
+     * @author wxz
+     * @date 15:29 2023/8/30
+     */
+    @Override
+    public String queryRefund(String orderNo)
+    {
+        log.info("查询退款");
+
+        AlipayTradeFastpayRefundQueryRequest request = new AlipayTradeFastpayRefundQueryRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderNo);
+        bizContent.put("out_request_no", orderNo);
+        request.setBizContent(bizContent.toString());
+
+        try
+        {
+            AlipayTradeFastpayRefundQueryResponse response = alipayClient.execute(request);
+
+            if (response.isSuccess())
+            {
+                log.info("调用成功");
+
+                return response.getBody();
+            }
+            else
+            {
+                log.error("调用失败");
+
+                return null;
+            }
+        }
+        catch (AlipayApiException e)
+        {
+            throw new RuntimeException(e);
         }
     }
 

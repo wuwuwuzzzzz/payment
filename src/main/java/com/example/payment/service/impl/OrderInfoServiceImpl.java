@@ -28,11 +28,20 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     @Resource
     private ProductMapper productMapper;
 
+    /**
+     * 生成订单
+     *
+     * @param productId   商品ID
+     * @param paymentType 支付类型
+     * @return com.example.payment.entity.OrderInfo
+     * @author wxz
+     * @date 11:24 2023/8/30
+     */
     @Override
-    public OrderInfo createOrderByProductId(Long productId)
+    public OrderInfo createOrderByProductId(Long productId, String paymentType)
     {
         // 查找已存在但未支付的订单
-        OrderInfo info = this.getNoPayOrderByProductId(productId);
+        OrderInfo info = this.getNoPayOrderByProductId(productId, paymentType);
         if (info != null)
         {
             return info;
@@ -46,6 +55,7 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         info.setProductId(productId);
         info.setTotalFee(product.getPrice());
         info.setOrderStatus(OrderStatus.NOTPAY.getType());
+        info.setPaymentType(paymentType);
         // 存入数据库
         baseMapper.insert(info);
         return info;
@@ -163,16 +173,18 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     /**
      * 查找已存在但未支付的订单
      *
-     * @param productId 商品ID
+     * @param productId   商品ID
+     * @param paymentType 支付类型
      * @return com.example.payment.entity.OrderInfo
      * @author wxz
      * @date 11:13 2023/8/28
      */
-    private OrderInfo getNoPayOrderByProductId(Long productId)
+    private OrderInfo getNoPayOrderByProductId(Long productId, String paymentType)
     {
         QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("product_id", productId);
         wrapper.eq("order_status", OrderStatus.NOTPAY.getType());
+        wrapper.eq("payment_type", paymentType);
         return baseMapper.selectOne(wrapper);
     }
 }

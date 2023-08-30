@@ -22,6 +22,11 @@ public class OrderInfo extends BaseEntity
     private String orderNo;
 
     /**
+     * 支付类型
+     */
+    private String paymentType;
+
+    /**
      * 用户id
      */
     private Long userId;

@@ -15,12 +15,13 @@ public interface OrderInfoService extends IService<OrderInfo>
     /**
      * 生成订单
      *
-     * @param productId 商品ID
+     * @param productId   商品ID
+     * @param paymentType 支付类型
      * @return com.example.payment.entity.OrderInfo
      * @author wxz
      * @date 10:58 2023/8/28
      */
-    OrderInfo createOrderByProductId(Long productId);
+    OrderInfo createOrderByProductId(Long productId, String paymentType);
 
     /**
      * 保存二维码

@@ -1,6 +1,5 @@
 package com.example.payment.controller;
 
-import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayConstants;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.example.payment.entity.OrderInfo;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Map;
 
 /**
@@ -137,5 +135,39 @@ public class AliPayController
         aliPayService.processOrder(params);
 
         return "success";
+    }
+
+    /**
+     * 取消订单
+     *
+     * @param orderNo 订单编号
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 11:29 2023/8/30
+     */
+    @PostMapping("/trade/close/{orderNo}")
+    public R cancel(@PathVariable String orderNo)
+    {
+        log.info("取消订单");
+
+        aliPayService.cancelOrder(orderNo);
+
+        return R.ok().setMsg("取消订单成功");
+    }
+
+    /**
+     * 查询订单
+     *
+     * @param orderNo 订单编号
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 14:15 2023/8/30
+     */
+    @GetMapping("/query/{orderNo}")
+    public R queryOrder(@PathVariable String orderNo)
+    {
+        log.info("查询订单");
+
+        return R.ok().setMsg("查询订单成功").data("result", aliPayService.queryOrder(orderNo));
     }
 }

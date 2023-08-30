@@ -4,6 +4,7 @@ import com.example.payment.config.WxPayConfig;
 import com.example.payment.entity.OrderInfo;
 import com.example.payment.entity.RefundInfo;
 import com.example.payment.enums.OrderStatus;
+import com.example.payment.enums.PayType;
 import com.example.payment.enums.wxpay.WxApiType;
 import com.example.payment.enums.wxpay.WxNotifyType;
 import com.example.payment.enums.wxpay.WxTradeState;
@@ -73,7 +74,7 @@ public class WxPayServiceImpl implements WxPayService
         log.info("生成订单");
 
         // 生成订单
-        OrderInfo info = orderInfoService.createOrderByProductId(productId);
+        OrderInfo info = orderInfoService.createOrderByProductId(productId, PayType.WXPAY.getType());
         if (info != null && StringUtils.hasText(info.getCodeUrl()))
         {
             log.info("订单已存在，直接返回二维码");

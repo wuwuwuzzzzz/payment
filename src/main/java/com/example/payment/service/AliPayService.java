@@ -26,4 +26,23 @@ public interface AliPayService
      * @date 10:24 2023/8/30
      */
     void processOrder(Map<String, String> params);
+
+    /**
+     * 取消订单
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 11:30 2023/8/30
+     */
+    void cancelOrder(String orderNo);
+
+    /**
+     * 查询订单
+     *
+     * @param orderNo 订单编号
+     * @return java.lang.String
+     * @author wxz
+     * @date 14:16 2023/8/30
+     */
+    String queryOrder(String orderNo);
 }

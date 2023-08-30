@@ -202,12 +202,12 @@ public class WxPayServiceImpl implements WxPayService
      * 查询订单
      *
      * @param orderNo 订单编号
-     * @return java.lang.Object
+     * @return java.lang.String
      * @author wxz
      * @date 11:18 2023/8/29
      */
     @Override
-    public Object queryOrder(String orderNo)
+    public String queryOrder(String orderNo)
     {
         log.info("查询订单编号：{}", orderNo);
 
@@ -235,6 +235,7 @@ public class WxPayServiceImpl implements WxPayService
                 log.info("failed,resp code = " + statusCode + ",return body = " + bodyAsString);
                 throw new IOException("request failed");
             }
+
             return bodyAsString;
         }
         catch (IOException e)
@@ -258,7 +259,7 @@ public class WxPayServiceImpl implements WxPayService
         log.info("核实订单状态");
 
         // 查询订单
-        String result = (String) this.queryOrder(orderNo);
+        String result = queryOrder(orderNo);
         if (StringUtils.hasText(result))
         {
             Gson gson = new Gson();

@@ -42,11 +42,11 @@ public interface WxPayService
      * 查询订单
      *
      * @param orderNo 订单编号
-     * @return java.lang.Object
+     * @return java.lang.String
      * @author wxz
      * @date 11:18 2023/8/29
      */
-    Object queryOrder(String orderNo);
+    String queryOrder(String orderNo);
 
     /**
      * 核实订单状态

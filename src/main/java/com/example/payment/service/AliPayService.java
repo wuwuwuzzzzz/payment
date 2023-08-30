@@ -45,4 +45,13 @@ public interface AliPayService
      * @date 14:16 2023/8/30
      */
     String queryOrder(String orderNo);
+
+    /**
+     * 核实订单
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 14:30 2023/8/30
+     */
+    void checkOrderStatus(String orderNo);
 }

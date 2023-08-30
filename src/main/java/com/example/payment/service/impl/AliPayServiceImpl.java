@@ -12,17 +12,23 @@ import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.example.payment.entity.OrderInfo;
 import com.example.payment.enums.OrderStatus;
 import com.example.payment.enums.PayType;
+import com.example.payment.enums.alipay.AliTradeStatus;
+import com.example.payment.enums.wxpay.WxTradeState;
 import com.example.payment.service.AliPayService;
 import com.example.payment.service.OrderInfoService;
 import com.example.payment.service.PaymentInfoService;
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -226,6 +232,59 @@ public class AliPayServiceImpl implements AliPayService
         catch (AlipayApiException e)
         {
             throw new RuntimeException("查单接口调用失败");
+        }
+    }
+
+    /**
+     * 核实订单
+     *
+     * @param orderNo 订单编号
+     * @author wxz
+     * @date 14:30 2023/8/30
+     */
+    @Override
+    public void checkOrderStatus(String orderNo)
+    {
+        log.info("核实支付宝订单状态");
+
+        // 查询订单
+        String result = queryOrder(orderNo);
+        if (StringUtils.hasText(result))
+        {
+            Gson gson = new Gson();
+            Map<String, LinkedHashMap> resultMap = gson.fromJson(result, HashMap.class);
+            // 获取支付宝的订单状态
+            LinkedHashMap alipayTradeQueryResponse = resultMap.get("alipay_trade_query_response");
+            String tradeStatus = (String) alipayTradeQueryResponse.get("trade_status");
+            // 判断订单状态
+            if (AliTradeStatus.SUCCESS.getType().equals(tradeStatus))
+            {
+                log.warn("订单已支付:{}", orderNo);
+
+                // 更新订单状态
+                orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.SUCCESS);
+
+                // 记录支付日志
+                paymentInfoService.createPaymentInfoForAliPay(alipayTradeQueryResponse);
+            }
+            else if (AliTradeStatus.NOTPAY.getType().equals(tradeStatus))
+            {
+                log.warn("订单未支付");
+
+                // 更新订单状态
+                orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.CLOSED);
+            }
+            else
+            {
+                log.info("订单状态未知");
+            }
+        }
+        else
+        {
+            log.warn("订单未创建");
+
+            // 更新订单状态
+            orderInfoService.updateStatusByOrderNo(orderNo, OrderStatus.CLOSED);
         }
     }
 

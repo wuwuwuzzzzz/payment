@@ -139,18 +139,20 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     /**
      * 查询创建超过minutes分钟的未支付订单
      *
-     * @param minutes 分钟
+     * @param minutes     分钟
+     * @param paymentType 支付类型
      * @return java.util.List<com.example.payment.entity.OrderInfo>
      * @author wxz
      * @date 11:38 2023/8/29
      */
     @Override
-    public List<OrderInfo> getNoPayOrderByDuration(int minutes)
+    public List<OrderInfo> getNoPayOrderByDuration(int minutes, String paymentType)
     {
         Instant instant = Instant.now().minus(Duration.ofMillis(minutes));
         QueryWrapper<OrderInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("order_status", OrderStatus.NOTPAY.getType());
         wrapper.le("create_time", instant);
+        wrapper.eq("payment_type", paymentType);
         return baseMapper.selectList(wrapper);
     }
 

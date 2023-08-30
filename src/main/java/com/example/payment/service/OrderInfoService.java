@@ -65,12 +65,13 @@ public interface OrderInfoService extends IService<OrderInfo>
     /**
      * 查询创建超过minutes分钟的未支付订单
      *
-     * @param minutes 分钟
+     * @param minutes     分钟
+     * @param paymentType 支付类型
      * @return java.util.List<com.example.payment.entity.OrderInfo>
      * @author wxz
      * @date 11:36 2023/8/29
      */
-    List<OrderInfo> getNoPayOrderByDuration(int minutes);
+    List<OrderInfo> getNoPayOrderByDuration(int minutes, String paymentType);
 
     /**
      * 根据订单编号获取订单

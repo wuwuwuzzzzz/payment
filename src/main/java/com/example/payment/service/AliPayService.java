@@ -74,4 +74,15 @@ public interface AliPayService
      * @date 15:29 2023/8/30
      */
     String queryRefund(String orderNo);
+
+    /**
+     * 获取账单地址
+     *
+     * @param billDate 日期
+     * @param type     类型
+     * @return java.lang.String
+     * @author wxz
+     * @date 15:34 2023/8/30
+     */
+    String queryBill(String billDate, String type);
 }

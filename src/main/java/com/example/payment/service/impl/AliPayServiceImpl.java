@@ -15,6 +15,7 @@ import com.example.payment.service.OrderInfoService;
 import com.example.payment.service.PaymentInfoService;
 import com.example.payment.service.RefundInfoService;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,6 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -255,9 +255,9 @@ public class AliPayServiceImpl implements AliPayService
         if (StringUtils.hasText(result))
         {
             Gson gson = new Gson();
-            Map<String, LinkedHashMap> resultMap = gson.fromJson(result, HashMap.class);
+            Map<String, LinkedTreeMap> resultMap = gson.fromJson(result, HashMap.class);
             // 获取支付宝的订单状态
-            LinkedHashMap alipayTradeQueryResponse = resultMap.get("alipay_trade_query_response");
+            LinkedTreeMap alipayTradeQueryResponse = resultMap.get("alipay_trade_query_response");
             String tradeStatus = (String) alipayTradeQueryResponse.get("trade_status");
             // 判断订单状态
             if (AliTradeStatus.SUCCESS.getType().equals(tradeStatus))
@@ -378,6 +378,51 @@ public class AliPayServiceImpl implements AliPayService
                 log.info("调用成功");
 
                 return response.getBody();
+            }
+            else
+            {
+                log.error("调用失败");
+
+                return null;
+            }
+        }
+        catch (AlipayApiException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 获取账单地址
+     *
+     * @param billDate 日期
+     * @param type     类型
+     * @return java.lang.String
+     * @author wxz
+     * @date 15:34 2023/8/30
+     */
+    @Override
+    public String queryBill(String billDate, String type)
+    {
+        try
+        {
+            AlipayDataDataserviceBillDownloadurlQueryRequest request = new AlipayDataDataserviceBillDownloadurlQueryRequest();
+            JSONObject bizContent = new JSONObject();
+            bizContent.put("bill_type", type);
+            bizContent.put("bill_date", billDate);
+            request.setBizContent(bizContent.toString());
+
+            AlipayDataDataserviceBillDownloadurlQueryResponse response = alipayClient.execute(request);
+
+            if (response.isSuccess())
+            {
+                log.info("调用成功");
+
+                Gson gson = new Gson();
+                Map<String, LinkedTreeMap> resultMap = gson.fromJson(response.getBody(), HashMap.class);
+                LinkedTreeMap downloadurlQueryResponse = resultMap.get("alipay_data_dataservice_bill_downloadurl_query_response");
+                return downloadurlQueryResponse.get("bill_download_url")
+                                               .toString();
             }
             else
             {

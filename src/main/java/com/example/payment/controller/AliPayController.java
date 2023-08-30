@@ -206,4 +206,11 @@ public class AliPayController
         return R.ok().setMsg("查询退款成功").data("result", aliPayService.queryRefund(orderNo));
     }
 
+    @GetMapping("/bill/downloadurl/query/{billDate}/{type}")
+    public R queryTradeBill(@PathVariable String billDate, @PathVariable String type)
+    {
+        log.info("查询对账单下载地址");
+
+        return R.ok().setMsg("查询对账单下载地址成功").data("downloadUrl", aliPayService.queryBill(billDate, type));
+    }
 }

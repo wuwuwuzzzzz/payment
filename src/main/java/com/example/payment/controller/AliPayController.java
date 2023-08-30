@@ -170,4 +170,25 @@ public class AliPayController
 
         return R.ok().setMsg("查询订单成功").data("result", aliPayService.queryOrder(orderNo));
     }
+
+    /**
+     * 申请退款
+     *
+     * @param orderNo 订单编号
+     * @param reason  退款原因
+     * @return com.example.payment.vo.R
+     * @author wxz
+     * @date 14:52 2023/8/30
+     */
+    @PostMapping("/trade/refund/{orderNo}/{reason}")
+    public R refunds(@PathVariable String orderNo, @PathVariable String reason)
+    {
+        log.info("申请退款");
+
+        aliPayService.refund(orderNo, reason);
+
+        return R.ok();
+    }
+
+
 }

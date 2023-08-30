@@ -27,9 +27,14 @@ public enum AliTradeStatus
     CLOSED("RADE_CLOSED"),
 
     /**
-     * 转入退款
+     * 退款成功
      */
-    REFUND("REFUND");
+    REFUND_SUCCESS("REFUND_SUCCESS"),
+
+    /**
+     * 退款失败
+     */
+    REFUND_ERROR("REFUND_ERROR");
 
     /**
      * 类型

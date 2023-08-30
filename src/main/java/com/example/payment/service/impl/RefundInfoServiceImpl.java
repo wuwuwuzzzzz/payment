@@ -96,4 +96,64 @@ public class RefundInfoServiceImpl extends ServiceImpl<RefundInfoMapper, RefundI
 
         baseMapper.update(refundInfo, wrapper);
     }
+
+    /**
+     * 创建退款单
+     *
+     * @param orderNo 订单编号
+     * @param reason  退款原因
+     * @return com.example.payment.entity.RefundInfo
+     * @author wxz
+     * @date 15:00 2023/8/30
+     */
+    @Override
+    public RefundInfo createRefundInfoByOrderNoForAliPay(String orderNo, String reason)
+    {
+        // 根据订单号获取订单信息
+        OrderInfo orderInfo = orderInfoService.getOrderByOrderNo(orderNo);
+
+        // 根据订单号生成退款订单
+        RefundInfo refundInfo = new RefundInfo();
+        // 订单编号
+        refundInfo.setOrderNo(orderNo);
+        // 退款编号
+        refundInfo.setRefundNo(OrderNoUtils.getRefundNo());
+        // 原订单金额
+        refundInfo.setTotalFee(orderInfo.getTotalFee());
+        // 退款金额
+        refundInfo.setRefund(orderInfo.getTotalFee());
+        // 退款原因
+        refundInfo.setReason(reason);
+        // 保存退款订单
+        baseMapper.insert(refundInfo);
+
+        return refundInfo;
+    }
+
+    /**
+     * 更新退款单
+     *
+     * @param refundNo     退款编号
+     * @param content      退款结果通知参数
+     * @param refundStatus 退款状态
+     * @author wxz
+     * @date 15:06 2023/8/30
+     */
+    @Override
+    public void updateRefundForAliPay(String refundNo, String content, String refundStatus)
+    {
+        // 按照退款单号查询退款单
+        QueryWrapper<RefundInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("refund_no", refundNo);
+
+        // 设置要修改的字段
+        RefundInfo refundInfo = new RefundInfo();
+        // 退款状态
+        refundInfo.setRefundStatus(refundStatus);
+        // 退款结果通知参数
+        refundInfo.setContentReturn(content);
+
+        // 更新退款单
+        baseMapper.update(refundInfo, wrapper);
+    }
 }
